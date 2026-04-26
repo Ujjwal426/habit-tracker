@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, description, category, frequency, customDays, target, color } = body
+    const { name, description, category, frequency, customDays, monthlyTarget, color } = body
 
     await connectDB()
     const habit = await Habit.create({
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
       category,
       frequency,
       customDays: customDays || [],
-      target: target || 1,
+      monthlyTarget: monthlyTarget || 1,
       color: color || '#6366f1',
     })
 

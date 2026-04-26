@@ -37,7 +37,15 @@ const categoryIcons: { [key: string]: string } = {
 export default function HabitCheckIn() {
   const [habits, setHabits] = useState<Habit[]>([])
   const [checkIns, setCheckIns] = useState<CheckIn[]>([])
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const today = new Date()
+    // Use local timezone to get today's date
+    const year = today.getFullYear()
+    const month = String(today.getMonth() + 1).padStart(2, '0')
+    const day = String(today.getDate()).padStart(2, '0')
+    const todayStr = `${year}-${month}-${day}`
+    return todayStr
+  })
   const [dataLoading, setDataLoading] = useState(true)
   const [loading, setLoading] = useState(false)
   const [activeHabitId, setActiveHabitId] = useState<string | null>(null)
@@ -77,6 +85,29 @@ export default function HabitCheckIn() {
 
   const isCheckInForSelectedDate = (checkIn: CheckIn) => {
     return formatDateKey(new Date(checkIn.date)) === selectedDate
+  }
+
+  const shouldShowHabitOnDate = (habit: Habit, date: Date) => {
+    const dayOfWeek = date.getDay() // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    
+    switch (habit.frequency) {
+      case 'daily':
+        return true
+      case 'weekdays':
+        return dayOfWeek >= 1 && dayOfWeek <= 5 // Monday to Friday
+      case 'weekends':
+        return dayOfWeek === 0 || dayOfWeek === 6 // Sunday and Saturday
+      case 'mon-wed-fri':
+        return dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5 // Monday, Wednesday, Friday
+      case 'tue-thu':
+        return dayOfWeek === 2 || dayOfWeek === 4 // Tuesday, Thursday
+      case 'mon-sat':
+        return dayOfWeek >= 1 && dayOfWeek <= 6 // Monday to Saturday
+      case 'custom':
+        return habit.customDays.includes(dayOfWeek)
+      default:
+        return true
+    }
   }
 
   const fetchHabits = async () => {
@@ -139,11 +170,12 @@ export default function HabitCheckIn() {
         )
         
         if (currentDayCheckIn && currentDayCheckIn.completed) {
-          // If today is completed, the count is the number of completed days
-          updatedCounts[habit._id] = habitCheckIns.length
+          // If today is completed, use the count from today's check-in
+          updatedCounts[habit._id] = currentDayCheckIn.count || habitCheckIns.length
         } else {
-          // If today is not completed or no check-in, show what today would be
-          updatedCounts[habit._id] = habitCheckIns.length + 1
+          // If today is not completed, show what the count would be if completed today
+          const lastCompletedCount = currentDayCheckIn?.count || habitCheckIns.length
+          updatedCounts[habit._id] = lastCompletedCount + 1
         }
         
         // Get notes for current date
@@ -229,15 +261,16 @@ export default function HabitCheckIn() {
   }
 
   const selectedDateCheckIns = checkIns.filter(isCheckInForSelectedDate)
+  const habitsForSelectedDate = habits.filter(habit => shouldShowHabitOnDate(habit, new Date(selectedDate)))
 
   const getCompletionRate = () => {
-    if (habits.length === 0) return 0
+    if (habitsForSelectedDate.length === 0) return 0
     const completed = selectedDateCheckIns.filter(ci => ci.completed).length
-    return Math.round((completed / habits.length) * 100)
+    return Math.round((completed / habitsForSelectedDate.length) * 100)
   }
 
   const completedCount = selectedDateCheckIns.filter(ci => ci.completed).length
-  const remainingCount = Math.max(habits.length - completedCount, 0)
+  const remainingCount = Math.max(habitsForSelectedDate.length - completedCount, 0)
   const completionRate = getCompletionRate()
   const selectedDateObject = new Date(`${selectedDate}T00:00:00`)
   const selectedDateLabel = selectedDateObject.toLocaleDateString('en-US', {
@@ -245,7 +278,14 @@ export default function HabitCheckIn() {
     month: 'long',
     day: 'numeric',
   })
-  const isToday = selectedDate === new Date().toISOString().split('T')[0]
+  const isToday = (() => {
+    const today = new Date()
+    const year = today.getFullYear()
+    const month = String(today.getMonth() + 1).padStart(2, '0')
+    const day = String(today.getDate()).padStart(2, '0')
+    const todayStr = `${year}-${month}-${day}`
+    return selectedDate === todayStr
+  })()
 
   const getEncouragement = () => {
     if (habits.length === 0) return 'Create your first habit and this page will become your daily check-in desk.'
@@ -278,7 +318,13 @@ export default function HabitCheckIn() {
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                max={new Date().toISOString().split('T')[0]}
+                max={(() => {
+    const today = new Date()
+    const year = today.getFullYear()
+    const month = String(today.getMonth() + 1).padStart(2, '0')
+    const day = String(today.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  })()}
                 className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-auto"
               />
             </div>
@@ -291,7 +337,7 @@ export default function HabitCheckIn() {
                 <p className="mt-1 text-4xl font-bold text-blue-700">{completionRate}%</p>
               </div>
               <div className="daily-progress-ring" style={{ ['--progress' as string]: `${completionRate * 3.6}deg` }}>
-                <div>{completedCount}/{habits.length}</div>
+                <div>{completedCount}/{habitsForSelectedDate.length}</div>
               </div>
             </div>
             <div className="mt-4 h-2 overflow-hidden rounded-full bg-gray-200">
@@ -344,7 +390,9 @@ export default function HabitCheckIn() {
         </div>
       ) : (
         <div className="grid gap-4">
-          {habits.map((habit, index) => {
+          {habits
+            .filter(habit => shouldShowHabitOnDate(habit, new Date(selectedDate)))
+            .map((habit, index) => {
             const isCompleted = isHabitCompleted(habit._id)
             return (
               <div
@@ -405,10 +453,7 @@ export default function HabitCheckIn() {
                         Day {counts[habit._id] || 1}
                       </span>
                       <span className="rounded-full bg-gray-100 px-3 py-1 font-medium">
-                        Daily target {habit.target}
-                      </span>
-                      <span className="rounded-full bg-gray-100 px-3 py-1 font-medium">
-                        Monthly target {habit.monthlyTarget || 22}
+                        Monthly target {habit.monthlyTarget}
                       </span>
                     </div>
 

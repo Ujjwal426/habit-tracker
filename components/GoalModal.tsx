@@ -41,7 +41,6 @@ interface FormData {
   description: string
   category: any
   frequency: any
-  target: number
   customDays: readonly any[]
   monthlyTarget: number
 }
@@ -61,9 +60,8 @@ const GoalModal: React.FC<GoalModalProps> = ({ isOpen, onClose, goal, onSave, lo
     description: '',
     category: null,
     frequency: null,
-    target: 1,
     customDays: [],
-    monthlyTarget: 22,
+    monthlyTarget: 1,
   })
   const [validationErrors, setValidationErrors] = useState<string[]>([])
   const [submitted, setSubmitted] = useState(false)
@@ -75,11 +73,10 @@ const GoalModal: React.FC<GoalModalProps> = ({ isOpen, onClose, goal, onSave, lo
         description: goal.description || '',
         category: categoryOptions.find(opt => opt.value === goal.category) || null,
         frequency: frequencyOptions.find(opt => opt.value === goal.frequency) || null,
-        target: goal.target || 1,
         customDays: goal.customDays
           ? dayOptions.filter(day => goal.customDays.includes(day.value))
           : [],
-        monthlyTarget: goal.monthlyTarget || 22,
+        monthlyTarget: goal.monthlyTarget || 1,
       })
     } else {
       setFormData({
@@ -87,9 +84,8 @@ const GoalModal: React.FC<GoalModalProps> = ({ isOpen, onClose, goal, onSave, lo
         description: '',
         category: null,
         frequency: null,
-        target: 1,
         customDays: [],
-        monthlyTarget: 22,
+        monthlyTarget: 1,
       })
     }
     setSubmitted(false)
@@ -119,10 +115,7 @@ const GoalModal: React.FC<GoalModalProps> = ({ isOpen, onClose, goal, onSave, lo
       errors.push('Please select at least one day for custom frequency')
     }
 
-    if (formData.target < 1 || formData.target > 100) {
-      errors.push('Target must be between 1 and 100')
-    }
-
+    
     if (formData.monthlyTarget < 1 || formData.monthlyTarget > 31) {
       errors.push('Monthly target must be between 1 and 31')
     }
@@ -150,15 +143,15 @@ const GoalModal: React.FC<GoalModalProps> = ({ isOpen, onClose, goal, onSave, lo
       description: formData.description.trim(),
       category: formData.category.value,
       frequency: formData.frequency.value,
-      target: formData.target,
       customDays: formData.customDays.map(day => day.value),
       monthlyTarget: formData.monthlyTarget,
     }
 
+    console.log('GoalModal submitting:', goalData)
     onSave(goalData)
   }
 
-  const getFieldError = (field: 'name' | 'description' | 'category' | 'frequency' | 'target' | 'customDays' | 'monthlyTarget') => {
+  const getFieldError = (field: 'name' | 'description' | 'category' | 'frequency' | 'customDays' | 'monthlyTarget') => {
     if (!submitted) return ''
 
     const fieldErrorMap = {
@@ -166,7 +159,6 @@ const GoalModal: React.FC<GoalModalProps> = ({ isOpen, onClose, goal, onSave, lo
       description: ['Description'],
       category: ['Category'],
       frequency: ['Frequency'],
-      target: ['Target'],
       customDays: ['custom frequency'],
       monthlyTarget: ['Monthly target'],
     }
@@ -387,28 +379,7 @@ const GoalModal: React.FC<GoalModalProps> = ({ isOpen, onClose, goal, onSave, lo
             </div>
           )}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Daily Target
-            </label>
-            <input
-              type="number"
-              min="1"
-              max="100"
-              value={formData.target}
-              onChange={(e) =>
-                handleFormChange({
-                  ...formData,
-                  target: Number(e.target.value),
-                })
-              }
-              className={`w-full rounded-xl border-2 px-4 py-3 transition-all focus:border-transparent focus:outline-none focus:ring-2 ${fieldClass('target')}`}
-            />
-            {getFieldError('target') && (
-              <p className="mt-2 text-sm font-medium text-red-600">{getFieldError('target')}</p>
-            )}
-          </div>
-
+          
           {/* Monthly Target */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">

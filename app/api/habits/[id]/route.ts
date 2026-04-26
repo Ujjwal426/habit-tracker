@@ -15,7 +15,7 @@ export async function PUT(
     }
 
     const body = await request.json()
-    const { name, description, category, frequency, customDays, target, color, isActive } = body
+    const { name, description, category, frequency, customDays, monthlyTarget, color, isActive } = body
 
     await connectDB()
     const habit = await Habit.findOneAndUpdate(
@@ -29,7 +29,7 @@ export async function PUT(
         category,
         frequency,
         customDays: customDays || [],
-        target: target || 1,
+        monthlyTarget: monthlyTarget || 1,
         color: color || '#6366f1',
         isActive: isActive !== undefined ? isActive : true,
         updatedAt: new Date(),

@@ -107,8 +107,7 @@ export default function DeleteHabitModal({
             <div className="min-w-0">
               <p className="truncate font-semibold text-gray-900">{habit.name}</p>
               <p className="mt-1 text-sm capitalize text-gray-500">
-                {habit.category} - {habit.frequency} - Daily target {habit.target}
-                {habit.monthlyTarget ? ` - Monthly target ${habit.monthlyTarget}` : ''}
+                {habit.category} - {habit.frequency} - Monthly target {habit.monthlyTarget}
               </p>
             </div>
           </div>

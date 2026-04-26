@@ -84,6 +84,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Habit not found' }, { status: 404 })
     }
     
+    // Calculate progressive count based on previous completed check-ins
+    const previousCheckIns = await HabitCheckIn.find({
+      habitId,
+      date: { $lt: new Date(date).setHours(0, 0, 0, 0) },
+      completed: true
+    }).sort({ date: 1 })
+    
+    const progressiveCount = completed ? previousCheckIns.length + 1 : previousCheckIns.length
+    
     const checkIn = await HabitCheckIn.findOneAndUpdate(
       {
         habitId,
@@ -91,7 +100,7 @@ export async function POST(request: NextRequest) {
       },
       {
         completed,
-        count: count || 0,
+        count: progressiveCount,
         notes: notes || '',
       },
       { upsert: true, new: true }

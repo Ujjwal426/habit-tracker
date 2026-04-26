@@ -79,6 +79,8 @@ export default function HabitList() {
     try {
       setLoading(true)
       setError(null)
+
+      console.log('habit data', JSON.stringify(habitData))
       
       const url = editingHabit ? `/api/habits/${editingHabit._id}` : '/api/habits'
       const method = editingHabit ? 'PUT' : 'POST'
@@ -278,7 +280,7 @@ export default function HabitList() {
                     <span className="flex items-center gap-1">
                       {frequencyLabels[habit.frequency]} 
                     </span>
-                    <span>Daily Target: {habit.target} | Monthly Target: {habit.monthlyTarget || 22}</span>
+                    <span>Monthly Target: {habit.monthlyTarget}</span>
                   </div>
                 </div>
                 

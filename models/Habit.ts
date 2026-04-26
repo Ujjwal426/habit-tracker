@@ -28,10 +28,11 @@ const HabitSchema = new mongoose.Schema({
     min: 0,
     max: 6,
   }],
-  target: {
+  monthlyTarget: {
     type: Number,
     default: 1,
     min: 1,
+    max: 31,
   },
   color: {
     type: String,

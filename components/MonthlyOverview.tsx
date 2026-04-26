@@ -48,6 +48,29 @@ export default function MonthlyOverview() {
     return `${year}-${month}-${day}`
   }
 
+  const shouldShowHabitOnDate = (habit: Habit, date: Date) => {
+    const dayOfWeek = date.getDay() // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    
+    switch (habit.frequency) {
+      case 'daily':
+        return true
+      case 'weekdays':
+        return dayOfWeek >= 1 && dayOfWeek <= 5 // Monday to Friday
+      case 'weekends':
+        return dayOfWeek === 0 || dayOfWeek === 6 // Sunday and Saturday
+      case 'mon-wed-fri':
+        return dayOfWeek === 1 || dayOfWeek === 3 || dayOfWeek === 5 // Monday, Wednesday, Friday
+      case 'tue-thu':
+        return dayOfWeek === 2 || dayOfWeek === 4 // Tuesday, Thursday
+      case 'mon-sat':
+        return dayOfWeek >= 1 && dayOfWeek <= 6 // Monday to Saturday
+      case 'custom':
+        return habit.customDays.includes(dayOfWeek)
+      default:
+        return true
+    }
+  }
+
   const fetchHabits = async () => {
     try {
       setLoading(true)
@@ -109,19 +132,37 @@ export default function MonthlyOverview() {
     })
   }
 
-  const getCompletedCount = () => checkIns.filter(ci => ci.completed).length
-
-  const getTotalPossible = () => habits.length * getDaysInMonth()
+  const getCompletedCount = () => {
+    let completedCount = 0
+    let totalPossible = 0
+    
+    for (let day = 1; day <= getDaysInMonth(); day++) {
+      const date = new Date(selectedYear, selectedMonth, day)
+      const habitsForDay = habits.filter(habit => shouldShowHabitOnDate(habit, date))
+      
+      totalPossible += habitsForDay.length
+      
+      for (const habit of habitsForDay) {
+        const checkIn = getCheckInForDate(day, habit._id)
+        if (checkIn && checkIn.completed) {
+          completedCount++
+        }
+      }
+    }
+    
+    return { completedCount, totalPossible }
+  }
 
   const getCompletionRate = () => {
     if (habits.length === 0) return 0
-    const totalPossible = getTotalPossible()
-    const completed = getCompletedCount()
-    return Math.round((completed / totalPossible) * 100)
+    const { completedCount, totalPossible } = getCompletedCount()
+    return totalPossible > 0 ? Math.round((completedCount / totalPossible) * 100) : 0
   }
 
   const getDailyCompletedCount = (day: number) => {
-    return habits.filter(habit => getCheckInForDate(day, habit._id)?.completed).length
+    const date = new Date(selectedYear, selectedMonth, day)
+    const habitsForDay = habits.filter(habit => shouldShowHabitOnDate(habit, date))
+    return habitsForDay.filter(habit => getCheckInForDate(day, habit._id)?.completed).length
   }
 
   const getBestDay = () => {
@@ -131,14 +172,17 @@ export default function MonthlyOverview() {
     let bestCount = 0
 
     for (let day = 1; day <= getDaysInMonth(); day++) {
-      const completed = getDailyCompletedCount(day)
+      const date = new Date(selectedYear, selectedMonth, day)
+      const habitsForDay = habits.filter(habit => shouldShowHabitOnDate(habit, date))
+      const completed = habitsForDay.filter(habit => getCheckInForDate(day, habit._id)?.completed).length
+      
       if (completed > bestCount) {
         bestDay = day
         bestCount = completed
       }
     }
 
-    return bestCount === 0 ? null : { day: bestDay, count: bestCount }
+    return { day: bestDay, count: bestCount }
   }
 
   const getHabitCompletion = (habitId: string) => {
@@ -151,6 +195,25 @@ export default function MonthlyOverview() {
     }
 
     return completed
+  }
+
+  const getHabitScheduledCompletion = (habitId: string) => {
+    let completed = 0
+    let scheduled = 0
+    
+    for (let day = 1; day <= getDaysInMonth(); day++) {
+      const date = new Date(selectedYear, selectedMonth, day)
+      const habit = habits.find(h => h._id === habitId)
+      
+      if (habit && shouldShowHabitOnDate(habit, date)) {
+        scheduled++
+        if (getCheckInForDate(day, habitId)?.completed) {
+          completed++
+        }
+      }
+    }
+    
+    return `${completed}/${scheduled}`
   }
 
   const getInsightText = () => {
@@ -211,12 +274,12 @@ export default function MonthlyOverview() {
         <div className="rounded-lg border border-green-200 bg-green-50 p-4 shadow-sm">
           <p className="text-sm font-medium text-green-700">Completion rate</p>
           <p className="mt-2 text-3xl font-bold text-green-800">{getCompletionRate()}%</p>
-          <p className="mt-1 text-xs text-green-700">{getCompletedCount()} of {getTotalPossible()} possible check-ins</p>
+          <p className="mt-1 text-xs text-green-700">{getCompletedCount().completedCount} of {getCompletedCount().totalPossible} possible check-ins</p>
         </div>
         <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 shadow-sm">
           <p className="text-sm font-medium text-blue-700">Best day</p>
           <p className="mt-2 text-3xl font-bold text-blue-800">
-            {getBestDay() ? `${getBestDay()?.count}/${habits.length}` : '0'}
+            {getBestDay() ? `${getBestDay()?.count}` : '0'}
           </p>
           <p className="mt-1 text-xs text-blue-700">
             {getBestDay() ? `${months[selectedMonth]} ${getBestDay()?.day}` : 'No completed habits yet'}
@@ -256,8 +319,10 @@ export default function MonthlyOverview() {
           ))}
           {Array.from({ length: daysInMonth }, (_, index) => {
             const day = index + 1
+            const date = new Date(selectedYear, selectedMonth, day)
+            const habitsForDay = habits.filter(habit => shouldShowHabitOnDate(habit, date))
             const completed = getDailyCompletedCount(day)
-            const rate = habits.length === 0 ? 0 : completed / habits.length
+            const rate = habitsForDay.length === 0 ? 0 : completed / habitsForDay.length
             const tone =
               rate === 0 ? 'border-gray-200 bg-gray-50 text-gray-500' :
               rate < 0.34 ? 'border-green-200 bg-green-100 text-green-800' :
@@ -267,12 +332,12 @@ export default function MonthlyOverview() {
             return (
               <div
                 key={day}
-                title={`${months[selectedMonth]} ${day}: ${completed} of ${habits.length} habits completed`}
+                title={`${months[selectedMonth]} ${day}: ${completed} of ${habitsForDay.length} habits completed`}
                 className={`aspect-square rounded-md border p-1 ${tone}`}
               >
                 <div className="text-xs font-semibold">{day}</div>
                 <div className="mt-1 text-center text-xs font-bold sm:text-sm">
-                  {completed}/{habits.length}
+                  {completed}/{habitsForDay.length}
                 </div>
               </div>
             )
@@ -323,6 +388,18 @@ export default function MonthlyOverview() {
                   <span className="truncate">{habit.name}</span>
                 </div>
                 {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(day => {
+                  const date = new Date(selectedYear, selectedMonth, day)
+                  const shouldShow = shouldShowHabitOnDate(habit, date)
+                  
+                  if (!shouldShow) {
+                    return (
+                      <div
+                        key={day}
+                        className="h-6"
+                      />
+                    )
+                  }
+                  
                   const checkIn = getCheckInForDate(day, habit._id)
                   const isCompleted = checkIn?.completed || false
                   
@@ -341,7 +418,7 @@ export default function MonthlyOverview() {
                   )
                 })}
                 <div className="pr-2 text-right text-sm font-semibold text-gray-700">
-                  {getHabitCompletion(habit._id)}/{daysInMonth}
+                  {getHabitScheduledCompletion(habit._id)}
                 </div>
               </div>
             ))}
@@ -353,7 +430,7 @@ export default function MonthlyOverview() {
       <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
         <h3 className="font-semibold text-blue-950">What this means</h3>
         <p className="mt-1 text-sm text-blue-900">
-          You completed {getCompletedCount()} out of {getTotalPossible()} possible habit check-ins this month. {getInsightText()}
+          You completed {getCompletedCount().completedCount} out of {getCompletedCount().totalPossible} possible habit check-ins this month. {getInsightText()}
         </p>
       </div>
     </div>
