@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import GoalModal from './GoalModal'
 import AppLoader from './AppLoader'
+import DeleteHabitModal from './DeleteHabitModal'
 
 interface Habit {
   _id: string
@@ -45,6 +46,8 @@ export default function HabitList() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null)
   const [loading, setLoading] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [habitToDelete, setHabitToDelete] = useState<Habit | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
@@ -122,16 +125,29 @@ export default function HabitList() {
     setError(null)
   }
 
-  const handleDeleteHabit = async (habit: Habit) => {
-    if (!confirm(`Are you sure you want to delete "${habit.name}"?`)) {
+  const handleDeleteHabit = (habit: Habit) => {
+    setHabitToDelete(habit)
+    setError(null)
+  }
+
+  const handleCancelDelete = () => {
+    if (deleteLoading) {
+      return
+    }
+
+    setHabitToDelete(null)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!habitToDelete) {
       return
     }
 
     try {
-      setLoading(true)
+      setDeleteLoading(true)
       setError(null)
       
-      const response = await fetch(`/api/habits/${habit._id}`, {
+      const response = await fetch(`/api/habits/${habitToDelete._id}`, {
         method: 'DELETE',
       })
 
@@ -140,8 +156,9 @@ export default function HabitList() {
         throw new Error(errorData.error || 'Failed to delete habit')
       }
 
-      setHabits(habits.filter(h => h._id !== habit._id))
+      setHabitToDelete(null)
       setSuccess('Habit deleted successfully!')
+      await fetchHabits()
       
       // Clear success message after 3 seconds
       setTimeout(() => setSuccess(null), 3000)
@@ -149,7 +166,7 @@ export default function HabitList() {
       setError(error instanceof Error ? error.message : 'Failed to delete habit')
       console.error('Error deleting habit:', error)
     } finally {
-      setLoading(false)
+      setDeleteLoading(false)
     }
   }
 
@@ -299,6 +316,14 @@ export default function HabitList() {
         onSave={handleSaveHabit}
         loading={loading}
         error={error}
+      />
+
+      <DeleteHabitModal
+        isOpen={Boolean(habitToDelete)}
+        habit={habitToDelete}
+        loading={deleteLoading}
+        onCancel={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
       />
     </div>
   )
