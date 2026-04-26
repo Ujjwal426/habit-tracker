@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Tracker - Build Better Habits</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-check-circle"></i>
+                <span>Habit Tracker</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#goals" class="nav-link active" data-section="goals">
+                        <i class="fas fa-bullseye"></i>
+                        Goals
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#daily" class="nav-link" data-section="daily">
+                        <i class="fas fa-calendar-day"></i>
+                        Daily
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#monthly" class="nav-link" data-section="monthly">
+                        <i class="fas fa-calendar-alt"></i>
+                        Monthly
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#dashboard" class="nav-link" data-section="dashboard">
+                        <i class="fas fa-chart-line"></i>
+                        Dashboard
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <!-- Goals Section -->
+        <section id="goals-section" class="content-section active">
+            <div class="section-header">
+                <h2>My Goals</h2>
+                <button class="btn btn-primary" id="add-goal-btn">
+                    <i class="fas fa-plus"></i>
+                    Add Goal
+                </button>
+            </div>
+            
+            <div class="goals-container" id="goals-container">
+                <!-- Goals will be dynamically added here -->
+            </div>
+        </section>
+
+        <!-- Daily Check-in Section -->
+        <section id="daily-section" class="content-section">
+            <div class="section-header">
+                <h2>Daily Check-in</h2>
+                <div class="date-selector">
+                    <input type="date" id="daily-date" class="date-input">
+                </div>
+            </div>
+            
+            <div class="daily-habits-container" id="daily-habits-container">
+                <!-- Daily habits will be dynamically added here -->
+            </div>
+        </section>
+
+        <!-- Monthly Overview Section -->
+        <section id="monthly-section" class="content-section">
+            <div class="section-header">
+                <h2>Monthly Overview</h2>
+                <div class="month-selector">
+                    <select id="month-select" class="month-select">
+                        <!-- Months will be dynamically added -->
+                    </select>
+                    <select id="year-select" class="year-select">
+                        <!-- Years will be dynamically added -->
+                    </select>
+                </div>
+            </div>
+            
+            <div class="monthly-calendar-container" id="monthly-calendar-container">
+                <!-- Monthly calendar will be dynamically added -->
+            </div>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard-section" class="content-section">
+            <div class="section-header">
+                <h2>Dashboard</h2>
+                <div class="period-selector">
+                    <button class="btn btn-outline" data-period="week">Week</button>
+                    <button class="btn btn-outline active" data-period="month">Month</button>
+                    <button class="btn btn-outline" data-period="year">Year</button>
+                </div>
+            </div>
+            
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="current-streak">0</h3>
+                        <p>Current Streak</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="completion-rate">0%</h3>
+                        <p>Completion Rate</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="best-streak">0</h3>
+                        <p>Best Streak</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="total-completed">0</h3>
+                        <p>Total Completed</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dashboard-charts">
+                <div class="chart-container">
+                    <h3>Progress Chart</h3>
+                    <canvas id="progress-chart"></canvas>
+                </div>
+                
+                <div class="chart-container">
+                    <h3>Goal Performance</h3>
+                    <canvas id="performance-chart"></canvas>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for Adding/Editing Goals -->
+    <div id="goal-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Add New Goal</h3>
+                <button class="modal-close" id="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="goal-form">
+                <div class="form-group">
+                    <label for="goal-name">Goal Name</label>
+                    <input type="text" id="goal-name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="goal-description">Description</label>
+                    <textarea id="goal-description" rows="3"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="goal-category">Category</label>
+                    <select id="goal-category">
+                        <option value="health">Health</option>
+                        <option value="fitness">Fitness</option>
+                        <option value="learning">Learning</option>
+                        <option value="productivity">Productivity</option>
+                        <option value="mindfulness">Mindfulness</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="goal-frequency">Frequency Pattern</label>
+                    <select id="goal-frequency" onchange="habitTracker.updateFrequencyOptions()">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="weekdays">Weekdays (Mon-Fri)</option>
+                        <option value="weekends">Weekends (Sat-Sun)</option>
+                        <option value="mon-wed-fri">Monday, Wednesday, Friday</option>
+                        <option value="tue-thu">Tuesday, Thursday</option>
+                        <option value="mon-sat">Monday to Saturday</option>
+                        <option value="custom">Custom Days</option>
+                        <option value="monthly">Monthly</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="custom-days-group" style="display: none;">
+                    <label>Select Days</label>
+                    <div class="days-selector">
+                        <label class="day-checkbox">
+                            <input type="checkbox" name="custom-days" value="0"> Mon
+                        </label>
+                        <label class="day-checkbox">
+                            <input type="checkbox" name="custom-days" value="1"> Tue
+                        </label>
+                        <label class="day-checkbox">
+                            <input type="checkbox" name="custom-days" value="2"> Wed
+                        </label>
+                        <label class="day-checkbox">
+                            <input type="checkbox" name="custom-days" value="3"> Thu
+                        </label>
+                        <label class="day-checkbox">
+                            <input type="checkbox" name="custom-days" value="4"> Fri
+                        </label>
+                        <label class="day-checkbox">
+                            <input type="checkbox" name="custom-days" value="5"> Sat
+                        </label>
+                        <label class="day-checkbox">
+                            <input type="checkbox" name="custom-days" value="6"> Sun
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="goal-target">Target (per selected period)</label>
+                    <input type="number" id="goal-target" min="1" value="1">
+                    <small class="form-hint">Number of times to complete this habit each time it's scheduled</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="goal-color">Color Theme</label>
+                    <div class="color-selector">
+                        <div class="color-option" data-color="#6366f1" style="background: #6366f1;"></div>
+                        <div class="color-option" data-color="#10b981" style="background: #10b981;"></div>
+                        <div class="color-option" data-color="#f59e0b" style="background: #f59e0b;"></div>
+                        <div class="color-option" data-color="#ef4444" style="background: #ef4444;"></div>
+                        <div class="color-option" data-color="#22d3ee" style="background: #22d3ee;"></div>
+                        <div class="color-option" data-color="#a855f7" style="background: #a855f7;"></div>
+                        <div class="color-option" data-color="#ec4899" style="background: #ec4899;"></div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" id="cancel-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Goal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,267 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+/* Custom styles for habit tracker */
+.navbar {
+  @apply bg-white shadow-md border-b border-gray-200;
+}
+
+.nav-container {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.nav-brand {
+  @apply flex items-center space-x-2 text-xl font-semibold text-gray-900;
+}
+
+.nav-menu {
+  @apply flex space-x-8;
+}
+
+.nav-link {
+  @apply flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-md transition-colors;
+}
+
+.nav-link.active {
+  @apply text-blue-600 bg-blue-50;
+}
+
+.btn {
+  @apply px-4 py-2 rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2;
+}
+
+.btn-primary {
+  @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500;
+}
+
+.btn-outline {
+  @apply border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-blue-500;
+}
+
+.modal {
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden;
+}
+
+.modal-content {
+  @apply bg-white rounded-lg shadow-xl max-w-md w-full mx-4;
+}
+
+.form-group {
+  @apply mb-4;
+}
+
+.form-group label {
+  @apply block text-sm font-medium text-gray-700 mb-2;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+}
+
+.stat-card {
+  @apply bg-white rounded-lg shadow p-6 border border-gray-200;
+}
+
+.habit-loader {
+  position: relative;
+  display: inline-grid;
+  width: 30px;
+  height: 30px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  align-items: end;
+}
+
+.habit-loader span {
+  display: block;
+  width: 100%;
+  height: 45%;
+  border-radius: 9999px;
+  background: #2563eb;
+  animation: habit-loader-pulse 0.9s ease-in-out infinite;
+}
+
+.habit-loader span:nth-child(2) {
+  background: #16a34a;
+  animation-delay: 0.12s;
+}
+
+.habit-loader span:nth-child(3) {
+  background: #f97316;
+  animation-delay: 0.24s;
+}
+
+.habit-loader-sm {
+  width: 18px;
+  height: 18px;
+  gap: 3px;
+}
+
+@keyframes habit-loader-pulse {
+  0%,
+  100% {
+    height: 35%;
+    opacity: 0.55;
+  }
+  50% {
+    height: 100%;
+    opacity: 1;
+  }
+}
+
+.daily-hero {
+  position: relative;
+  animation: daily-fade-up 420ms ease-out both;
+}
+
+.daily-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 12% 20%, rgba(37, 99, 235, 0.16), transparent 26%),
+    radial-gradient(circle at 88% 15%, rgba(22, 163, 74, 0.14), transparent 24%),
+    linear-gradient(135deg, rgba(239, 246, 255, 0.92), rgba(255, 255, 255, 0.96));
+}
+
+.daily-progress-ring {
+  width: 82px;
+  height: 82px;
+  border-radius: 9999px;
+  display: grid;
+  place-items: center;
+  background: conic-gradient(#2563eb var(--progress), #e5e7eb 0deg);
+  animation: daily-pop 520ms ease-out both;
+}
+
+.daily-progress-ring > div {
+  width: 62px;
+  height: 62px;
+  border-radius: 9999px;
+  display: grid;
+  place-items: center;
+  background: white;
+  color: #1d4ed8;
+  font-size: 0.875rem;
+  font-weight: 800;
+}
+
+.daily-progress-fill {
+  transition: width 520ms ease;
+}
+
+.daily-habit-row {
+  animation: daily-fade-up 420ms ease-out both;
+}
+
+.daily-check-button svg {
+  transform: scale(0.85);
+  transition: transform 180ms ease;
+}
+
+.daily-check-button:hover svg,
+.daily-check-button:focus-visible svg {
+  transform: scale(1);
+}
+
+.daily-complete-badge {
+  animation: daily-pop 260ms ease-out both;
+}
+
+@keyframes daily-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes daily-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+  70% {
+    transform: scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .daily-hero,
+  .daily-habit-row,
+  .daily-complete-badge,
+  .daily-progress-ring {
+    animation: none;
+  }
+
+  .daily-progress-fill,
+  .daily-check-button svg {
+    transition: none;
+  }
+}
+
+/* Custom animations for auth background */
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+.animation-delay-6000 {
+  animation-delay: 6s;
+}
