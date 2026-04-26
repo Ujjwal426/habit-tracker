@@ -25,6 +25,9 @@ export default function DashboardStats() {
 
   useEffect(() => {
     fetchHabits()
+  }, [])
+
+  useEffect(() => {
     fetchStats()
   }, [period])
 
@@ -92,23 +95,14 @@ export default function DashboardStats() {
         startDate.setDate(endDate.getDate() - 364)
       }
 
-      const promises = []
-      for (let date = new Date(startDate); date <= endDate; date.setDate(date.getDate() + 1)) {
-        const dateStr = formatDateKey(date)
-        promises.push(fetch(`/api/habits/checkin?date=${dateStr}`))
+      const response = await fetch(
+        `/api/habits/checkin?startDate=${formatDateKey(startDate)}&endDate=${formatDateKey(endDate)}`
+      )
+
+      if (response.ok) {
+        const data = await response.json()
+        setCheckIns(data)
       }
-      
-      const responses = await Promise.all(promises)
-      const allCheckIns: CheckIn[] = []
-      
-      for (const response of responses) {
-        if (response.ok) {
-          const data = await response.json()
-          allCheckIns.push(...data)
-        }
-      }
-      
-      setCheckIns(allCheckIns)
     } catch (error) {
       console.error('Error fetching stats:', error)
     } finally {

@@ -8,12 +8,10 @@
   --background-end-rgb: 255, 255, 255;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+.dark {
+  --foreground-rgb: 226, 232, 240;
+  --background-start-rgb: 2, 6, 23;
+  --background-end-rgb: 15, 23, 42;
 }
 
 body {
@@ -24,6 +22,111 @@ body {
       rgb(var(--background-end-rgb))
     )
     rgb(var(--background-start-rgb));
+}
+
+body {
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+.dark [class~="bg-white"],
+.dark [class~="bg-gray-50"],
+.dark [class~="bg-gray-100"] {
+  background-color: rgb(15 23 42);
+}
+
+.dark [class~="bg-white/80"],
+.dark [class~="bg-white/90"],
+.dark [class~="bg-white/95"] {
+  background-color: rgb(15 23 42 / 0.9);
+}
+
+.dark [class~="bg-blue-50"] {
+  background-color: rgb(30 41 59);
+}
+
+.dark [class~="bg-green-50"] {
+  background-color: rgb(6 78 59 / 0.34);
+}
+
+.dark [class~="bg-orange-50"],
+.dark [class~="bg-yellow-50"] {
+  background-color: rgb(120 53 15 / 0.32);
+}
+
+.dark [class~="bg-red-50"] {
+  background-color: rgb(127 29 29 / 0.28);
+}
+
+.dark [class~="bg-gray-200"],
+.dark [class~="bg-slate-100"] {
+  background-color: rgb(30 41 59);
+}
+
+.dark [class~="text-gray-950"],
+.dark [class~="text-gray-900"],
+.dark [class~="text-gray-800"],
+.dark [class~="text-slate-950"],
+.dark [class~="text-slate-900"] {
+  color: rgb(248 250 252);
+}
+
+.dark [class~="text-gray-700"],
+.dark [class~="text-gray-600"],
+.dark [class~="text-slate-700"],
+.dark [class~="text-slate-600"] {
+  color: rgb(203 213 225);
+}
+
+.dark [class~="text-gray-500"],
+.dark [class~="text-gray-400"],
+.dark [class~="text-slate-500"] {
+  color: rgb(148 163 184);
+}
+
+.dark [class~="text-blue-600"],
+.dark [class~="text-blue-700"] {
+  color: rgb(125 211 252);
+}
+
+.dark [class~="text-green-700"],
+.dark [class~="text-green-800"] {
+  color: rgb(110 231 183);
+}
+
+.dark [class~="text-orange-800"] {
+  color: rgb(253 186 116);
+}
+
+.dark [class~="text-red-600"],
+.dark [class~="text-red-700"] {
+  color: rgb(252 165 165);
+}
+
+.dark [class~="border-gray-100"],
+.dark [class~="border-gray-200"],
+.dark [class~="border-gray-300"],
+.dark [class~="border-blue-100"],
+.dark [class~="border-green-200"],
+.dark [class~="border-red-200"],
+.dark [class~="border-slate-200"] {
+  border-color: rgb(51 65 85);
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: rgb(15 23 42);
+  color: rgb(248 250 252);
+  border-color: rgb(71 85 105);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: rgb(148 163 184);
+}
+
+.dark input[type="date"] {
+  color-scheme: dark;
 }
 
 /* Custom styles for habit tracker */
@@ -173,6 +276,18 @@ body {
   font-weight: 800;
 }
 
+.dark .daily-progress-ring > div {
+  background: rgb(15 23 42);
+  color: rgb(125 211 252);
+}
+
+.dark .daily-hero::before {
+  background:
+    radial-gradient(circle at 12% 20%, rgba(56, 189, 248, 0.16), transparent 26%),
+    radial-gradient(circle at 88% 15%, rgba(52, 211, 153, 0.14), transparent 24%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.94), rgba(30, 41, 59, 0.94));
+}
+
 .daily-progress-fill {
   transition: width 520ms ease;
 }
@@ -234,34 +349,22 @@ body {
   }
 }
 
-/* Custom animations for auth background */
-@keyframes blob {
-  0% {
-    transform: translate(0px, 0px) scale(1);
-  }
-  33% {
-    transform: translate(30px, -50px) scale(1.1);
-  }
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
-  }
-  100% {
-    transform: translate(0px, 0px) scale(1);
-  }
+.auth-bg {
+  background:
+    radial-gradient(circle at 10% 10%, rgba(59, 130, 246, 0.18), transparent 28%),
+    radial-gradient(circle at 85% 20%, rgba(16, 185, 129, 0.16), transparent 26%),
+    linear-gradient(135deg, rgb(239, 246, 255), rgb(248, 250, 252));
 }
 
-.animate-blob {
-  animation: blob 7s infinite;
+.dark .auth-bg {
+  background:
+    linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.96)),
+    linear-gradient(90deg, rgba(16, 185, 129, 0.16), rgba(37, 99, 235, 0.14));
 }
 
-.animation-delay-2000 {
-  animation-delay: 2s;
-}
-
-.animation-delay-4000 {
-  animation-delay: 4s;
-}
-
-.animation-delay-6000 {
-  animation-delay: 6s;
+.auth-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 36px 36px;
 }

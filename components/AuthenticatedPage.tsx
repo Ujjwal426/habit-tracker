@@ -33,10 +33,10 @@ export default function AuthenticatedPage({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
       <Navbar />
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="rounded-lg bg-white p-6 shadow-lg">
+        <div className="rounded-lg border border-transparent bg-white p-6 shadow-lg dark:border-slate-800 dark:bg-slate-900/90 dark:shadow-black/30">
           {children}
         </div>
       </main>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import ThemeToggle from "@/components/ThemeToggle";
 
 type IconName =
   | "dashboard"
@@ -172,7 +173,7 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200/50 sticky top-0 z-50">
+    <nav className="sticky top-0 z-50 border-b border-gray-200/50 bg-white/95 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-950/90 dark:shadow-black/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -180,7 +181,7 @@ export default function Navbar() {
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
               <span className="text-white text-xl font-bold">H</span>
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-emerald-500 bg-clip-text text-transparent dark:from-emerald-300 dark:to-sky-300">
               Habit Tracker
             </span>
           </Link>
@@ -199,7 +200,7 @@ export default function Navbar() {
                       className={`flex items-center space-x-2 rounded-lg px-3 py-2 transition-all duration-200 group ${
                         isActive
                           ? "bg-blue-50 text-blue-700"
-                          : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                          : "text-gray-700 hover:bg-blue-50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-emerald-300"
                       }`}
                     >
                       <NavIcon
@@ -215,6 +216,7 @@ export default function Navbar() {
 
           {/* User Menu */}
           <div className="flex items-center space-x-4">
+            <ThemeToggle />
             {session ? (
               <div className="relative">
                 <button
@@ -250,12 +252,12 @@ export default function Navbar() {
 
                 {/* Dropdown Menu */}
                 {isMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-200/50 py-2 z-50">
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="text-sm font-medium text-gray-900">
+                  <div className="absolute right-0 z-50 mt-2 w-48 rounded-xl border border-gray-200/50 bg-white py-2 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+                    <div className="border-b border-gray-100 px-4 py-3 dark:border-slate-800">
+                      <p className="text-sm font-medium text-gray-900 dark:text-slate-100">
                         {session.user?.name}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 dark:text-slate-400">
                         {session.user?.email}
                       </p>
                     </div>
@@ -273,7 +275,7 @@ export default function Navbar() {
               <div className="flex items-center space-x-4">
                 <Link
                   href="/auth/signin"
-                  className="px-4 py-2 text-gray-700 hover:text-blue-600 font-medium transition-colors"
+                  className="px-4 py-2 font-medium text-gray-700 transition-colors hover:text-blue-600 dark:text-slate-200 dark:hover:text-emerald-300"
                 >
                   Sign In
                 </Link>
@@ -289,7 +291,7 @@ export default function Navbar() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+              className="rounded-lg p-2 text-gray-700 transition-colors hover:bg-gray-100 dark:text-slate-200 dark:hover:bg-slate-800 md:hidden"
             >
               <svg
                 className="w-6 h-6"
@@ -310,14 +312,14 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-gray-200/50 py-4">
+          <div className="border-t border-gray-200/50 py-4 dark:border-slate-800 md:hidden">
             {session ? (
               <div className="space-y-2">
-                <div className="px-4 py-3 border-b border-gray-100">
-                  <p className="text-sm font-medium text-gray-900">
+                <div className="border-b border-gray-100 px-4 py-3 dark:border-slate-800">
+                  <p className="text-sm font-medium text-gray-900 dark:text-slate-100">
                     {session.user?.name}
                   </p>
-                  <p className="text-xs text-gray-500">{session.user?.email}</p>
+                  <p className="text-xs text-gray-500 dark:text-slate-400">{session.user?.email}</p>
                 </div>
                 {navItems.map((item) => (
                   <Link
@@ -327,7 +329,7 @@ export default function Navbar() {
                     className={`flex items-center space-x-3 px-4 py-3 transition-colors ${
                       pathname === item.href
                         ? "bg-blue-50 text-blue-700"
-                        : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                        : "text-gray-700 hover:bg-blue-50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-emerald-300"
                     }`}
                   >
                     <NavIcon name={item.icon} className="h-5 w-5" />
@@ -346,7 +348,7 @@ export default function Navbar() {
               <div className="space-y-2">
                 <Link
                   href="/auth/signin"
-                  className="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                  className="block px-4 py-3 text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-emerald-300"
                 >
                   Sign In
                 </Link>

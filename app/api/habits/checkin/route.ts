@@ -13,6 +13,8 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const date = searchParams.get('date')
+    const startDate = searchParams.get('startDate')
+    const endDate = searchParams.get('endDate')
     const habitId = searchParams.get('habitId')
 
     await connectDB()
@@ -33,6 +35,20 @@ export async function GET(request: NextRequest) {
       query.date = {
         $gte: startOfDay,
         $lte: endOfDay
+      }
+    } else if (startDate || endDate) {
+      query.date = {}
+
+      if (startDate) {
+        const start = new Date(startDate)
+        start.setHours(0, 0, 0, 0)
+        query.date.$gte = start
+      }
+
+      if (endDate) {
+        const end = new Date(endDate)
+        end.setHours(23, 59, 59, 999)
+        query.date.$lte = end
       }
     }
     

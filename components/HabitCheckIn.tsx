@@ -47,15 +47,37 @@ export default function HabitCheckIn() {
   const [counts, setCounts] = useState<{ [key: string]: number }>({})
 
   useEffect(() => {
-    const loadCheckInData = async () => {
+    const loadHabits = async () => {
       setDataLoading(true)
-      const fetchedHabits = await fetchHabits()
-      await fetchCheckIns(fetchedHabits)
+      await fetchHabits()
       setDataLoading(false)
     }
 
-    loadCheckInData()
-  }, [selectedDate])
+    loadHabits()
+  }, [])
+
+  useEffect(() => {
+    if (habits.length > 0) {
+      fetchCheckIns(habits)
+    }
+  }, [selectedDate, habits])
+
+  const formatDateKey = (date: Date) => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
+  const getCheckInHabitId = (checkIn: CheckIn) => {
+    if (typeof checkIn.habitId === 'string') return checkIn.habitId
+    if (checkIn.habitId && checkIn.habitId._id) return checkIn.habitId._id
+    return null
+  }
+
+  const isCheckInForSelectedDate = (checkIn: CheckIn) => {
+    return formatDateKey(new Date(checkIn.date)) === selectedDate
+  }
 
   const fetchHabits = async () => {
     try {
@@ -90,7 +112,7 @@ export default function HabitCheckIn() {
     try {
       setError(null)
       // Fetch all check-ins for this habit to calculate progressive counts
-      const response = await fetch(`/api/habits/checkin`)
+      const response = await fetch(`/api/habits/checkin?endDate=${selectedDate}`)
       
       if (!response.ok) {
         throw new Error('Failed to fetch check-ins')
@@ -106,14 +128,14 @@ export default function HabitCheckIn() {
       for (const habit of habitsForCounts) {
         // Get all check-ins for this habit up to and including the selected date
         const habitCheckIns = data.filter((ci: CheckIn) => 
-          ci.habitId === habit._id && 
+          getCheckInHabitId(ci) === habit._id &&
           new Date(ci.date) <= new Date(selectedDate) &&
           ci.completed
         )
         
         // Get check-in for current date specifically
         const currentDayCheckIn = data.find((ci: CheckIn) => 
-          ci.habitId === habit._id && ci.date === selectedDate
+          getCheckInHabitId(ci) === habit._id && isCheckInForSelectedDate(ci)
         )
         
         if (currentDayCheckIn && currentDayCheckIn.completed) {
@@ -169,22 +191,23 @@ export default function HabitCheckIn() {
       setCheckIns(prev => {
         // Remove existing check-in for this habit and date, then add the new one
         const filtered = prev.filter(ci => {
-          const checkInHabitId = typeof ci.habitId === 'string' ? ci.habitId : 
-                              (ci.habitId && typeof ci.habitId === 'object' ? ci.habitId._id : null)
-          return !(checkInHabitId === habitId && ci.date === selectedDate)
+          return !(getCheckInHabitId(ci) === habitId && isCheckInForSelectedDate(ci))
         })
         return [...filtered, savedCheckIn]
       })
 
-      setSuccess(completed ? 'Habit marked as completed! 🎉' : 'Habit marked as incomplete')
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccess(null), 3000)
-      
-      // Refetch fresh data to ensure UI is up to date
-      setTimeout(() => {
-        fetchHabits().then(fetchedHabits => fetchCheckIns(fetchedHabits))
-      }, 500)
+      const previousCompleted = checkIns.some(ci => {
+        return getCheckInHabitId(ci) === habitId && isCheckInForSelectedDate(ci) && ci.completed
+      })
+
+      if (completed !== previousCompleted) {
+        setCounts(prev => ({
+          ...prev,
+          [habitId]: Math.max(1, (prev[habitId] || 1) + (completed ? 1 : -1)),
+        }))
+      }
+
+      setSuccess(completed ? 'Habit marked as completed!' : 'Habit marked as incomplete')
       
       // Clear success message after 3 seconds
       setTimeout(() => setSuccess(null), 3000)
@@ -200,23 +223,20 @@ export default function HabitCheckIn() {
   const isHabitCompleted = (habitId: string) => {
     const checkIn = checkIns.find(ci => {
       // Handle different types of habitId
-      if (typeof ci.habitId === 'string') {
-        return ci.habitId === habitId
-      } else if (ci.habitId && typeof ci.habitId === 'object' && ci.habitId._id) {
-        return ci.habitId._id === habitId
-      }
-      return false
+      return getCheckInHabitId(ci) === habitId && isCheckInForSelectedDate(ci)
     })
     return checkIn?.completed || false
   }
 
+  const selectedDateCheckIns = checkIns.filter(isCheckInForSelectedDate)
+
   const getCompletionRate = () => {
     if (habits.length === 0) return 0
-    const completed = checkIns.filter(ci => ci.completed).length
+    const completed = selectedDateCheckIns.filter(ci => ci.completed).length
     return Math.round((completed / habits.length) * 100)
   }
 
-  const completedCount = checkIns.filter(ci => ci.completed).length
+  const completedCount = selectedDateCheckIns.filter(ci => ci.completed).length
   const remainingCount = Math.max(habits.length - completedCount, 0)
   const completionRate = getCompletionRate()
   const selectedDateObject = new Date(`${selectedDate}T00:00:00`)

@@ -2,14 +2,15 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import ThemeToggle from '@/components/ThemeToggle'
 
 export default function Home() {
   const [isLogin, setIsLogin] = useState(true)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-emerald-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
       {/* Header */}
-      <header className="bg-white shadow-sm">
+      <header className="border-b border-gray-200 bg-white/90 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
@@ -17,9 +18,10 @@ export default function Home() {
                 <h1 className="text-2xl font-bold text-blue-600">Habit Tracker</h1>
               </div>
             </div>
-            <nav className="flex space-x-8">
+            <nav className="flex items-center space-x-5">
               <a href="#features" className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">Features</a>
               <Link href="/auth/signin" className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">Login</Link>
+              <ThemeToggle />
             </nav>
           </div>
         </div>
